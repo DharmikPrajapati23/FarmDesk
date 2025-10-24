@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../middle/AuthContext";
 
-const API = "http://localhost:5000";
+const API = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 export default function Officer_Navbar() {
   const navigate = useNavigate();

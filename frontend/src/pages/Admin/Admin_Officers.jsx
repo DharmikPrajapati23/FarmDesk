@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../middle/AuthContext";
 
-const API = "http://localhost:5000";
+const API = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 export default function Admin_Officers() {
   const user = useAuth(); // { _id, role, company_id, username, ... }

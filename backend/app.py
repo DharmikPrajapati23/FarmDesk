@@ -21,7 +21,7 @@ app = Flask(__name__)
 # CORS: allow Vite dev origin and credentials
 CORS(
     app,
-    resources={r"/*": {"origins": ["http://localhost:5173"]}},
+    resources={r"/*": {"origins": ["http://localhost:5173", "https://your-frontend-domain.com"]}},
     supports_credentials=True,
 )
 
@@ -29,7 +29,7 @@ CORS(
 MONGO_URL = os.getenv("DATABASE_URL")
 client = MongoClient(MONGO_URL)
 db = client["FarmDesk"]
-users = db.users       # company documents with embedded employees
+companies = db.companies       # company documents with embedded employees
 crops = db.crops       # unchanged shape: one doc per company_id with crop_details array
 
 # JWT secret
@@ -100,7 +100,7 @@ def current_user():
         if not company_id or not emp_id:
             return None, "Invalid token"
 
-        comp = users.find_one({"company_id": company_id}, {"employees.password_hash": 0})
+        comp = companies.find_one({"company_id": company_id}, {"employees.password_hash": 0})
         if not comp:
             return None, "User not found"
 
@@ -168,7 +168,7 @@ def clear_auth_cookie(resp):
 
 # ---------- Auth helpers ----------
 def _find_employee_for_login(company_id, username, want_role=None):
-    comp = users.find_one({"company_id": company_id})
+    comp = companies.find_one({"company_id": company_id})
     if not comp:
         return None, None
     for e in comp.get("employees", []):
@@ -191,7 +191,7 @@ def create_company_admin():
 
     hashed_pw = hash_password(password)
 
-    comp = users.find_one({"company_id": company_id})
+    comp = companies.find_one({"company_id": company_id})
     if not comp:
         emp = {
             "_id": str(ObjectId()),
@@ -199,7 +199,7 @@ def create_company_admin():
             "password_hash": hashed_pw,
             "role": "Admin",
         }
-        users.insert_one({"company_id": company_id, "employees": [emp]})
+        companies.insert_one({"company_id": company_id, "employees": [emp]})
         return jsonify({"message": "Company admin created successfully", "id": emp["_id"]}), 201
 
     # company exists -> check username uniqueness
@@ -213,7 +213,7 @@ def create_company_admin():
         "password_hash": hashed_pw,
         "role": "Admin",
     }
-    users.update_one({"company_id": company_id}, {"$push": {"employees": emp}})
+    companies.update_one({"company_id": company_id}, {"$push": {"employees": emp}})
     return jsonify({"message": "Company admin created successfully", "id": emp["_id"]}), 201
 
 # ---------- Auth: me, login, logout ----------
@@ -280,7 +280,7 @@ def officer_login():
 @require_role("Admin")
 def list_officers():
     company_id = request.user.get("company_id")
-    comp = users.find_one({"company_id": company_id}, {"employees.password_hash": 0})
+    comp = companies.find_one({"company_id": company_id}, {"employees.password_hash": 0})
     items = []
     if comp:
         for e in comp.get("employees", []):
@@ -304,7 +304,7 @@ def create_officer():
     if not username or not password:
         return jsonify({"error": "Username and password are required"}), 400
 
-    comp = users.find_one({"company_id": company_id})
+    comp = companies.find_one({"company_id": company_id})
     if not comp:
         return jsonify({"error": "Company not found"}), 404
 
@@ -318,7 +318,7 @@ def create_officer():
         "password_hash": hash_password(password),
         "role": "Officer",
     }
-    users.update_one({"company_id": company_id}, {"$push": {"employees": emp}})
+    companies.update_one({"company_id": company_id}, {"$push": {"employees": emp}})
     return jsonify({"message": "Officer created", "id": emp["_id"]}), 201
 
 @app.route("/admin/officers/<officer_id>", methods=["DELETE"])
@@ -326,7 +326,7 @@ def create_officer():
 def delete_officer(officer_id):
     company_id = request.user.get("company_id")
 
-    comp = users.find_one({"company_id": company_id})
+    comp = companies.find_one({"company_id": company_id})
     if not comp:
         return jsonify({"error": "Company not found"}), 404
 
@@ -338,7 +338,7 @@ def delete_officer(officer_id):
     if not exists:
         return jsonify({"error": "Officer not found"}), 404
 
-    users.update_one(
+    companies.update_one(
         {"company_id": company_id},
         {"$pull": {"employees": {"_id": officer_id}}}
     )

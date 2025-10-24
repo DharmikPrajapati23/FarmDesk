@@ -16,7 +16,7 @@ function ProtectedRoute({ children }) {
 
   useEffect(() => {
     let isMounted = true;
-    fetch(`http://localhost:5000/api/auth/me`, {
+    fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:5000'}/api/auth/me`, {
       method: "GET",
       credentials: "include",
     })

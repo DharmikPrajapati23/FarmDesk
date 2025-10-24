@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 
-const API = "http://localhost:5000";
+const API = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 function normalizeRole(role) {
   if (!role) return undefined;
