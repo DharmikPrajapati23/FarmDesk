@@ -21,7 +21,9 @@ app = Flask(__name__)
 # CORS: allow Vite dev origin and credentials
 CORS(
     app,
-    resources={r"/*": {"origins": ["http://localhost:5173", "http://localhost:5175", "http://localhost:3000", "http://127.0.0.1:5173", "http://127.0.0.1:5175", "http://127.0.0.1:3000"]}},
+    resources={r"/*": {"origins": ["https://farm-desk-4hg5ek2tm-dharmiks-projects-5105b4cc.vercel.app"]}},
+
+    # resources={r"/*": {"origins": ["http://localhost:5173", "http://localhost:5175", "http://localhost:3000", "http://127.0.0.1:5173", "http://127.0.0.1:5175", "http://127.0.0.1:3000"]}},
     supports_credentials=True,
 )
 
