@@ -21,7 +21,7 @@ app = Flask(__name__)
 # CORS: allow Vite dev origin and credentials
 CORS(
     app,
-    resources={r"/*": {"origins": ["http://localhost:5173", "https://your-frontend-domain.com"]}},
+    resources={r"/*": {"origins": ["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173", "http://127.0.0.1:3000"]}},
     supports_credentials=True,
 )
 
@@ -237,7 +237,7 @@ def admin_login():
     password = data.get("password") or ""
 
     if not company_id or not username or not password:
-        return jsonify({"error": "Missing required fields"}), 400
+        return jsonify({"error": "Missing required fields"}), 400 
 
     comp, emp = _find_employee_for_login(company_id, username, want_role="Admin")
     if comp is None:
@@ -519,7 +519,7 @@ if __name__ == '__main__':
 
 # from functools import wraps
 
-# load_dotenv()
+# load_dotenv()  
 
 # app = Flask(__name__)
 
@@ -691,7 +691,7 @@ if __name__ == '__main__':
 #     password = data.get("password")
 
 #     if not company_id or not username or not password:
-#         return jsonify({"error": "Missing required fields"}), 400 
+#         return jsonify({"error": "Missing required fields"}), 400
 
 #     user = users.find_one({"company_id": company_id, "username": username})
 #     if not user:
