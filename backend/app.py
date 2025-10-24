@@ -154,9 +154,9 @@ def set_auth_cookie(resp, token, hours=8):
     resp.set_cookie(
         COOKIE_NAME,
         token,
-        httponly=True,
+        httponly=False,  # Allow JavaScript access for debugging
         secure=COOKIE_SECURE,
-        samesite=COOKIE_SAMESITE,
+        samesite="None" if COOKIE_SECURE else "Lax",  # None for cross-origin
         expires=expires,
         path=COOKIE_PATH,
     )
